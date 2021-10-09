@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  kafka-map:
+    image: kafka-map
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kafka-map
+    restart: always
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+    volumes:
+      - ./zookeeper/data:/data
+      - ./zookeeper/datalog:/datalog
+  kafka:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      # kafka发布到zookeeper供客户端使用的服务地址
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://{ip}:9092
+      # kafka服务监听地址
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./kafka/data:/var/lib/kafka/data
+    depends_on:
+      - zookeeper
