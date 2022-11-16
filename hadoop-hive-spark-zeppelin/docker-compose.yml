@@ -1,0 +1,87 @@
+version: "3.8"
+services:
+  slave1:
+    build:
+      context: .
+      shm_size: '2gb'
+    container_name: slave1
+    networks:
+      default:
+         ipv4_address: 172.12.0.3
+    extra_hosts:
+      - "master: 172.12.0.2"
+      - "slave2: 172.12.0.4"
+    command: bash -c  " 
+         /usr/sbin/sshd
+         && hadoop-daemon.sh --config /usr/local/hadoop/etc/hadoop start datanode
+         && yarn-daemon.sh --config /usr/local/hadoop/etc/hadoop start nodemanager
+         && start-slave.sh master:7077
+         && tail -f /dev/null"
+    hostname: slave1
+    volumes:
+       - myhadoop:/slave1
+  slave2:
+    build:
+      context: .
+      shm_size: '2gb'
+    container_name: slave2
+    networks:
+      default:
+        ipv4_address: 172.12.0.4
+    extra_hosts:
+      - "master: 172.12.0.2"
+      - "slave1: 172.12.0.3"
+    command: bash -c  "
+      /usr/sbin/sshd
+      && hadoop-daemon.sh --config /usr/local/hadoop/etc/hadoop start datanode
+      && yarn-daemon.sh --config /usr/local/hadoop/etc/hadoop start nodemanager
+      && start-slave.sh master:7077
+      && tail -f /dev/null"
+    hostname: slave2
+    volumes:
+      - myhadoop:/slave2
+  master:
+    build:
+      context: .
+      shm_size: '2gb'
+      args: 
+           FORMAT_NAMENODE_COMMAND: hdfs namenode -format
+    container_name: master
+    networks:
+      default:
+         ipv4_address: 172.12.0.2
+    extra_hosts:
+      - "slave1: 172.12.0.3"
+      - "slave2: 172.12.0.4"
+    command: bash -c  "
+        /usr/sbin/sshd
+        && start-dfs.sh
+        && start-yarn.sh
+        && mr-jobhistory-daemon.sh start historyserver
+        && start-master.sh
+        && tail -f /dev/null"
+    ports:
+      - 9870:9870
+      - 8090:8090
+      - 8080:8080
+      - 10000:10000
+      - 10002:10002
+      - 8070:8070
+      - 8060:8060
+      - 7080:7080
+      - 7070:7070
+      - 8780:8780
+      - 8793:8793
+      - 4040:4040
+      - 7000:7000
+    hostname: master
+    volumes:
+       - myhadoop:/master
+volumes:
+  myhadoop:
+    external: true
+networks:
+  default:
+    external:
+      name: hadoop-network
+
