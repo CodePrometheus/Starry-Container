@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zk
+    ports:
+      - "2181:2181"
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    restart: always
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kfk
+    depends_on:
+      - zookeeper
+    ports:
+      - "9091:9091"
+      - "9999:9999"
+    expose:
+      - "9999:9999"
+    environment:
+      KAFKA_BROKER_ID: 0
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.64.128:9091
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9091
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      JMX_PORT: 9999
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  kafka-eagle:
+    image: nickzurich/kafka-eagle:3.0.1
+    container_name: ke
+    depends_on:
+      - kafka
+    ports:
+      - "8048:8048"
+    environment:
+      - "JAVA_OPTS=-Xms128m -Xmx512m"
+      - "TZ=Asia/Shanghai"
+      - "KE_HOME=/app/kafka-eagle"
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./config:/app/kafka-eagle/conf
