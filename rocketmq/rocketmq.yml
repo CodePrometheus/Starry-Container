@@ -1,0 +1,35 @@
+# export ROCKETMQ_VERSION=5.1.4
+version: '3.9'
+services:
+  mqnamesrv:
+    image: apache/rocketmq:5.1.4
+    container_name: mqnamesrv
+    ports:
+      - "9876:9876"
+    environment:
+      - MAX_POSSIBLE_HEAP=1024m
+      - JAVA_OPT_EXT=-server -Xms256m -Xmx256m -Xmn128m
+    command: sh mqnamesrv
+  mqbroker:
+    image: apache/rocketmq:5.1.4
+    container_name: mqbroker
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+      - "10912:10912"
+    volumes:
+      - ./conf/broker.conf:/opt/rocketmq-5.1.4/conf/broker.conf
+    command: sh mqbroker -n mqnamesrv:9876 -c /opt/rocketmq-5.1.4/conf/broker.conf # 外网链接需要配置 `-c`
+    depends_on:
+      - mqnamesrv
+    environment:
+      - MAX_POSSIBLE_HEAP=1024m
+      - JAVA_OPT_EXT=-server -Xms256m -Xmx256m -Xmn128m
+  rocketmq-console:
+    image: styletang/rocketmq-console-ng
+    container_name: rocketmq-console
+    restart: always
+    ports:
+      - "8180:8080"
+    environment:
+      JAVA_OPTS: "-Drocketmq.namesrv.addr=mqnamesrv:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false"

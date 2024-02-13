@@ -2,8 +2,8 @@ version: '3.8'
 
 services:
   rabbitmq:
-    image: rabbitmq:3.12.9-management
-    container_name: rabbitmq_3.12.9
+    image: rabbitmq:3.12.12-management
+    container_name: rabbitmq_3.12.12
     hostname: rabbitmq
     ports:
       - "5672:5672"
