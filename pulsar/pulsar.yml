@@ -1,0 +1,24 @@
+#  CSRF_TOKEN=$(curl http://localhost:7750/pulsar-manager/csrf-token) 
+#  curl \
+#    -H "X-XSRF-TOKEN:$CSRF_TOKEN" \
+#  -H "Cookie: XSRF-TOKEN=$CSRF_TOKEN;" \
+#  -H 'Content-Type: application/json' \
+#    -X PUT http://localhost:7750/pulsar-manager/users/superuser \
+#    -d '{"name":"pulsar","password":"pulsar","description":"dev","email":"abc@qq.com"}'
+version: '3.9'
+services:
+  pulsar:
+    image: apachepulsar/pulsar
+    command: bin/pulsar standalone
+    ports:
+      - "6650:6650"
+      - "8081:8080"
+  pulsar-manager:
+    image: apachepulsar/pulsar-manager
+    ports:
+      - "9527:9527"
+      - "7750:7750"
+    environment:
+      SPRING_CONFIGURATION_FILE: /pulsar-manager/pulsar-manager/application.properties
+    depends_on:
+      - pulsar
