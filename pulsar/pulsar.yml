@@ -9,6 +9,7 @@ version: '3.9'
 services:
   pulsar:
     image: apachepulsar/pulsar
+    container_name: pulsar
     command: bin/pulsar standalone
     ports:
       - "6650:6650"
