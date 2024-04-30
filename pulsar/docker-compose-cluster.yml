@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   zk1:
-    image: apachepulsar/pulsar:2.7.2
+    image: apachepulsar/pulsar:3.1.1
     hostname: zk1
     ports:
       - "2181:2181"
@@ -10,16 +10,16 @@ services:
       - ./data/zk1:/pulsar/data/zookeeper/
       - ./conf/zookeeper.conf:/pulsar/conf/zookeeper.conf
     restart: on-failure
-    entrypoint: 
-      - sh 
-      - -c  
+    entrypoint:
+      - sh
+      - -c
       - |
         mkdir -p data/zookeeper 
         echo 1 > data/zookeeper/myid 
         bin/pulsar zookeeper
-    
+
   zk2:
-    image: apachepulsar/pulsar:2.7.2
+    image: apachepulsar/pulsar:3.1.1
     hostname: zk2
     ports:
       - "2182:2181"
@@ -27,16 +27,16 @@ services:
       - ./data/zk2:/pulsar/data/zookeeper/
       - ./conf/zookeeper.conf:/pulsar/conf/zookeeper.conf
     restart: on-failure
-    entrypoint: 
-      - sh 
-      - -c  
+    entrypoint:
+      - sh
+      - -c
       - |
         mkdir -p data/zookeeper 
         echo 2 > data/zookeeper/myid 
         bin/pulsar zookeeper
 
   zk3:
-    image: apachepulsar/pulsar:2.7.2
+    image: apachepulsar/pulsar:3.1.1
     hostname: zk3
     ports:
       - "2183:2181"
@@ -44,31 +44,31 @@ services:
       - ./data/zk3:/pulsar/data/zookeeper/
       - ./conf/zookeeper.conf:/pulsar/conf/zookeeper.conf
     restart: on-failure
-    entrypoint: 
-      - sh 
-      - -c  
+    entrypoint:
+      - sh
+      - -c
       - |
         mkdir -p data/zookeeper 
         echo 3 > data/zookeeper/myid 
         bin/pulsar zookeeper
 
   init-metadata:
-      image: apachepulsar/pulsar:2.7.2
-      hostname: init-metadata
-      restart: on-failure
-      entrypoint: bin/pulsar initialize-cluster-metadata \
-                --cluster pulsar-cluster-1 \
-                --zookeeper zk1:2181,zk2:2181,zk3:2181 \
-                --configuration-store zk1:2181,zk2:2181,zk3:2181 \
-                --web-service-url http://pulsar-proxy:8081 \
-                --broker-service-url pulsar://pulsar-proxy:6650
-      depends_on:
-        - zk1
-        - zk2
-        - zk3
+    image: apachepulsar/pulsar:3.1.1
+    hostname: init-metadata
+    restart: on-failure
+    entrypoint: bin/pulsar initialize-cluster-metadata \
+      --cluster pulsar-cluster \
+      --zookeeper zk1:2181,zk2:2181,zk3:2181 \
+      --configuration-store zk1:2181,zk2:2181,zk3:2181 \
+      --web-service-url http://pulsar-proxy:8080 \
+      --broker-service-url pulsar://pulsar-proxy:6650
+    depends_on:
+      - zk1
+      - zk2
+      - zk3
 
   bookie1:
-    image: apachepulsar/pulsar:2.7.2
+    image: apachepulsar/pulsar:3.1.1
     hostname: bookie1
     ports:
       - "3181:3181"
@@ -81,7 +81,7 @@ services:
       - init-metadata
 
   bookie2:
-    image: apachepulsar/pulsar:2.7.2
+    image: apachepulsar/pulsar:3.1.1
     hostname: bookie2
     ports:
       - "3182:3181"
@@ -94,7 +94,7 @@ services:
       - init-metadata
 
   bookie3:
-    image: apachepulsar/pulsar:2.7.2
+    image: apachepulsar/pulsar:3.1.1
     hostname: bookie3
     ports:
       - "3183:3181"
@@ -107,7 +107,7 @@ services:
       - init-metadata
 
   broker1:
-    image: apachepulsar/pulsar:2.7.2
+    image: apachepulsar/pulsar:3.1.1
     hostname: broker1
     volumes:
       - ./data/broker1:/pulsar/data/broker/
@@ -120,7 +120,7 @@ services:
       - bookie3
 
   broker2:
-    image: apachepulsar/pulsar:2.7.2
+    image: apachepulsar/pulsar:3.1.1
     hostname: broker2
     volumes:
       - ./data/broker2:/pulsar/data/broker/
@@ -133,10 +133,10 @@ services:
       - bookie3
 
   broker3:
-    image: apachepulsar/pulsar:2.7.2
+    image: apachepulsar/pulsar:3.1.1
     hostname: broker3
     volumes:
-      - ./data/broker2:/pulsar/data/broker/
+      - ./data/broker3:/pulsar/data/broker/
       - ./conf/broker.conf:/pulsar/conf/broker.conf
     restart: on-failure
     entrypoint: bin/pulsar broker
@@ -146,11 +146,11 @@ services:
       - bookie3
 
   pulsar-proxy:
-    image: apachepulsar/pulsar:2.7.2
+    image: apachepulsar/pulsar:3.1.1
     hostname: pulsar-proxy
     ports:
       - "6650:6650"
-      - "8081:8080"
+      - "8080:8080"
     volumes:
       - ./conf/proxy.conf:/pulsar/conf/proxy.conf
     restart: on-failure
@@ -160,7 +160,7 @@ services:
       - broker2
 
   dashboard:
-    image: apachepulsar/pulsar-manager:v0.2.0
+    image: apachepulsar/pulsar-manager
     volumes:
       - ./conf/application.properties:/pulsar-manager/pulsar-manager/application.properties
       - ./conf/bkvm.conf:/pulsar-manager/pulsar-manager/bkvm.conf

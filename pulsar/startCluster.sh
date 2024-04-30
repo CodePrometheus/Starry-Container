@@ -7,4 +7,4 @@ mkdir -p data/{bookie1,bookie2,bookie3}
 mkdir -p data/{broker1,broker2,broker3}
 
 # 启动服务
-docker compose -f docker-compose-cluster.yml up
+docker compose -f docker-compose-cluster.yml down && docker compose -f docker-compose-cluster.yml up
