@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  es:
+    hostname: es
+    image: elasticsearch:8.13.4
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    environment:
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - discovery.type=single-node
+      - TZ=Asia/Shanghai
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false

@@ -8,7 +8,7 @@
 version: '3.9'
 services:
   pulsar:
-    image: apachepulsar/pulsar
+    image: apachepulsar/pulsar:3.1.1
     container_name: pulsar
     command: bin/pulsar standalone
     ports:

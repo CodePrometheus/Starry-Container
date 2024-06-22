@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    hostname: zookeeper
+    image: zookeeper:3.9.1
+    ports:
+      - "2181:2181"
+  clickhouse-server:
+    image: clickhouse/clickhouse-server:latest
+    hostname: clickhouse-server
+    volumes:
+      - ./config.xml:/etc/clickhouse-server/config.xml
+    depends_on:
+      - zookeeper
+      - prometheus
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    ports:
+      - "8123:8123"
+      - "9363:9363"
+  prometheus:
+    image: bitnami/prometheus:latest
+    hostname: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
