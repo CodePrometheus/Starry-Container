@@ -4,20 +4,27 @@
 services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.108.0
-    command: ["--config=/etc/otel-collector.yaml"]
+    command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
-      - ./otel-collector.yaml:/etc/otel-collector.yaml
+      - ./otel-collector.yaml:/etc/otel-collector-config.yaml
     ports:
-      - 4317:4317
+      - "4317:4317" # gRPC
+      - "4318:4318" # HTTP
 
   prometheus:
     image: prom/prometheus:v2.54.1
     volumes:
       - ./prometheus.yaml:/etc/prometheus/prometheus.yml
     ports:
-      - 9090:9090
+      - "9090:9090"
 
   jaeger:
     image: jaegertracing/all-in-one:1.60
     ports:
-      - 16686:16686
+      - "5775:5775"        # UDP for Zipkin
+      - "6831:6831/udp"    # UDP for Jaeger
+      - "6832:6832/udp"    # UDP for Jaeger
+      - "5778:5778"        # HTTP for the Jaeger UI
+      - "16686:16686"      # Jaeger UI
+      - "14268:14268"      # HTTP endpoint for Jaeger
+      - "14250:14250"      # gRPC endpoint for Jaeger
